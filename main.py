@@ -1,9 +1,9 @@
 import logging
 import time
-from telegram.ext import ApplicationBuilder, MessageHandler, filters
+from telegram.ext import ApplicationBuilder, MessageHandler, filters, CommandHandler
 from config import Config
 from database import init_db
-from handlers import handle_message
+from handlers import handle_message, start_command
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,11 +28,15 @@ async def rate_limited_handler(update, context):
 def main():
     init_db()
     app = ApplicationBuilder().token(Config.BOT_TOKEN).build()
+    
+    # Add handlers
+    app.add_handler(CommandHandler("start", start_command))
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, rate_limited_handler)
     )
+    
     logger.info("Bot started polling")
-    app.run_polling()  # This blocks until the bot is stopped
+    app.run_polling()
 
 if __name__ == "__main__":
     main()
